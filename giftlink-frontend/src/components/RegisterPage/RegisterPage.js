@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { urlConfig } from '../../config';
+import { useAppContext } from '../../context/AuthContext';
 import './RegisterPage.css';
 
 function RegisterPage() {
@@ -9,60 +10,48 @@ function RegisterPage() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [loading, setLoading] = useState(false);
+  // error state as shown in the task hints
+  const [showerr, setShowerr] = useState('');
   const navigate = useNavigate();
+  const { setIsLoggedIn, setUserName } = useAppContext();
 
   // handleRegister function
   const handleRegister = async () => {
-    setErrorMessage('');
-    setLoading(true);
     try {
-      // Basic front-end validation
-      if (!firstName || !lastName || !email || !password) {
-        setErrorMessage('All fields are required.');
-        return;
-      }
-
-      const url = `${urlConfig.backendUrl}/api/auth/register`;
-      const response = await fetch(url, {
+      const response = await fetch(`${urlConfig.backendUrl}/api/auth/register`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'content-type': 'application/json',
         },
-        body: JSON.stringify({ firstName, lastName, email, password })
+        body: JSON.stringify({
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          password: password,
+        })
       });
 
-      if (!response.ok) {
-        // Try to parse validation errors from backend
-        let backendError = '';
-        try {
-          const errData = await response.json();
-          backendError = errData?.error || (Array.isArray(errData?.errors) ? errData.errors.map(e => e.msg).join(', ') : '');
-        } catch (_) {}
-        throw new Error(backendError || `Registration failed (${response.status})`);
+      const json = await response.json();
+
+      if (json.authtoken) {
+        sessionStorage.setItem('auth-token', json.authtoken);
+        sessionStorage.setItem('name', firstName);
+        sessionStorage.setItem('email', json.email);
+        // set logged in state using useAppContext
+        setIsLoggedIn(true);
+        // set username so Navbar can display it
+        setUserName(firstName);
+        // navigate to main page
+        navigate('/app');
       }
 
-      const data = await response.json();
-      const authtoken = data?.authtoken;
-      const returnedEmail = data?.email;
-
-      if (!authtoken || !returnedEmail) {
-        throw new Error('Invalid response from server.');
+      // show backend error if registration fails
+      if (json.error) {
+        setShowerr(json.error);
       }
-
-      // Persist session info
-      sessionStorage.setItem('auth-token', authtoken);
-      sessionStorage.setItem('email', returnedEmail);
-      sessionStorage.setItem('name', `${firstName} ${lastName}`.trim());
-
-      // Navigate to main page after successful registration
-      navigate('/app');
-    } catch (error) {
-      console.error('Error in handleRegister:', error);
-      setErrorMessage(error?.message || 'An unexpected error occurred.');
-    } finally {
-      setLoading(false);
+    } catch (e) {
+      console.log("Error fetching details: " + e.message);
+      setShowerr(e.message);
     }
   };
 
@@ -122,14 +111,12 @@ function RegisterPage() {
               />
             </div>
 
-            {/* Error message */}
-            {errorMessage && (
-              <div className="alert alert-danger" role="alert">{errorMessage}</div>
-            )}
+            {/* Display error message to end user */}
+            <div className="text-danger">{showerr}</div>
 
             {/* Register button */}
-            <button className="btn btn-primary w-100 mb-3" onClick={handleRegister} disabled={loading}>
-              {loading ? 'Registering...' : 'Register'}
+            <button className="btn btn-primary w-100 mb-3" onClick={handleRegister}>
+              Register
             </button>
 
             <p className="mt-4 text-center">
