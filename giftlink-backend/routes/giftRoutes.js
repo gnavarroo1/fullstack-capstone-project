@@ -1,3 +1,7 @@
+const express = require('express');
+const router = express.Router();
+const connectToDatabase = require('../models/db');
+
 router.get('/', async (req, res) => {
     try {
         // Task 1: Connect to MongoDB and store connection to db constant
@@ -27,8 +31,8 @@ router.get('/:id', async (req, res) => {
 
         const id = req.params.id;
 
-        // Task 3: Find a specific gift by ID using the collection.fineOne method and store in constant called gift
-        const gift = await collection.find({ id: id});
+        // Task 3: Find a specific gift by ID using the collection.findOne method and store in constant called gift
+        const gift = await collection.findOne({ id: id});
 
         if (!gift) {
             return res.status(404).send('Gift not found');
@@ -48,9 +52,8 @@ router.post('/', async (req, res, next) => {
     try {
         const db = await connectToDatabase();
         const collection = db.collection("gifts");
-        const gift = await collection.insertOne(req.body);
-
-        res.status(201).json(gift.ops[0]);
+        const result = await collection.insertOne(req.body);
+        res.status(201).json({ insertedId: result.insertedId });
     } catch (e) {
         next(e);
     }

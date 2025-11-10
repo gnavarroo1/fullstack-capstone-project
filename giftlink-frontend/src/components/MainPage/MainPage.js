@@ -7,19 +7,40 @@ function MainPage() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Task 1: Write async fetch operation
-        // Write your code below this line
+        // Task 1: Fetch gifts from backend with explicit error handling and logging
+        const fetchGifts = async () => {
+            try {
+                const url = `${urlConfig.backendUrl}/api/gifts`;
+                const response = await fetch(url);
+                if (!response.ok) {
+                    // Something went wrong with the HTTP response
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
+                const data = await response.json();
+                setGifts(Array.isArray(data) ? data : []);
+            } catch (error) {
+                // Explicit error handling and logging
+                console.error('Fetch error (gifts):', error?.message || error);
+            }
+        };
+
+        fetchGifts();
     }, []);
 
     // Task 2: Navigate to details page
     const goToDetailsPage = (productId) => {
-        // Write your code below this line
+        // Navigate to the product details page
+        navigate(`/app/product/${productId}`);
 
       };
 
     // Task 3: Format timestamp
     const formatDate = (timestamp) => {
-        // Write your code below this line
+        // Convert seconds to milliseconds and format a readable date
+        if (timestamp === undefined || timestamp === null) return 'Unknown date';
+        const date = new Date(Number(timestamp) * 1000);
+        if (isNaN(date.getTime())) return 'Invalid date';
+        return date.toLocaleDateString('default', { month: 'long', day: 'numeric', year: 'numeric' });
       };
 
     const getConditionClass = (condition) => {
@@ -34,19 +55,26 @@ function MainPage() {
                         <div className="card product-card">
 
                             {/* // Task 4: Display gift image or placeholder */}
-                            {/* // Write your code below this line */}
+                            {/* // Show product image if available; otherwise a placeholder */}
+                            <div className="image-placeholder">
+                                {gift.image ? (
+                                    <img src={gift.image} alt={gift.name} className="card-img-top" />
+                                ) : (
+                                    <div className="no-image-available">No Image Available</div>
+                                )}
+                            </div>
 
                             <div className="card-body">
 
-                                {/* // Task 5: Display gift image or placeholder */}
-                                {/* // Write your code below this line */}
+                                {/* // Task 5: Display gift name */}
+                                <h5 className="card-title">{gift.name}</h5>
 
                                 <p className={`card-text ${getConditionClass(gift.condition)}`}>
                                 {gift.condition}
                                 </p>
 
-                                {/* // Task 6: Display gift image or placeholder */}
-                                {/* // Write your code below this line */}
+                                {/* // Task 6: Display formatted date */}
+                                <p className="card-text">{formatDate(gift.date_added)}</p>
                                 
 
                                 <button onClick={() => goToDetailsPage(gift.id)} className="btn btn-primary">

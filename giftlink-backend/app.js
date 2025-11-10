@@ -10,7 +10,8 @@ const {loadData} = require("./util/import-mongo/index");
 
 const app = express();
 app.use("*",cors());
-const port = 3060;
+// Allow configuring the server port via environment variable; default to 3060
+const port = process.env.PORT ? Number(process.env.PORT) : 3060;
 
 // Connect to MongoDB; we just do this one time
 connectToDatabase().then(() => {
