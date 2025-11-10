@@ -18,6 +18,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "watch": "set CHOKIDAR_USEPOLLING=true && set WATCHPACK_POLLING=true && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
