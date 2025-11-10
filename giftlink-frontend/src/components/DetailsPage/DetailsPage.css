@@ -1,4 +1,58 @@
-/* Style for image placeholder */
+/* DetailsPage basic styles: keep it simple and readable */
+
+.details-title {
+  font-weight: 700;
+  color: #212529;
+}
+
+/* Large image placeholder area */
+.image-placeholder-large {
+  width: 100%;
+  min-height: 240px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.product-image-large {
+  width: 100%;
+  height: auto;
+  max-height: 360px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.no-image-available-large {
+  color: #6c757d;
+  font-size: 0.95rem;
+}
+
+.comments-section h5 {
+  font-weight: 600;
+}
+
+.comments-section .mb-2 {
+  padding: 6px 8px;
+  border-radius: 6px;
+  background-color: #f9fafb;
+  border: 1px solid #eef0f2;
+}
+
+/* Card header back button alignment */
+.card-header .btn.btn-light {
+  border-color: #e9ecef;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .product-image-large {
+    max-height: 260px;
+  }
+}
 .image-placeholder-large {
     width: 100%;
     height: 400px;

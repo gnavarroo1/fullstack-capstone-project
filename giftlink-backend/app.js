@@ -28,6 +28,8 @@ const giftRoutes = require('./routes/giftRoutes');
 
 // Search API Task 1: import the searchRoutes and store in a constant called searchRoutes
 const searchRoutes = require('./routes/searchRoutes');
+// Auth API: import the authRoutes
+const authRoutes = require('./routes/authRoutes');
 
 
 const pinoHttp = require('pino-http');
@@ -41,6 +43,8 @@ app.use('/api/gifts', giftRoutes);
 
 // Search API Task 2: add the searchRoutes to the server by using the app.use() method.
 app.use('/api/search', searchRoutes);
+// Auth API: mount authRoutes at /api/auth
+app.use('/api/auth', authRoutes);
 
 
 // Global Error Handler

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { urlConfig } from '../../config';
 import './RegisterPage.css';
 
 function RegisterPage() {
@@ -8,14 +9,60 @@ function RegisterPage() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   // handleRegister function
   const handleRegister = async () => {
+    setErrorMessage('');
+    setLoading(true);
     try {
-      console.log('Register invoked', { firstName, lastName, email });
-      // TODO: integrar con backend (POST /api/users/register)
+      // Basic front-end validation
+      if (!firstName || !lastName || !email || !password) {
+        setErrorMessage('All fields are required.');
+        return;
+      }
+
+      const url = `${urlConfig.backendUrl}/api/auth/register`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ firstName, lastName, email, password })
+      });
+
+      if (!response.ok) {
+        // Try to parse validation errors from backend
+        let backendError = '';
+        try {
+          const errData = await response.json();
+          backendError = errData?.error || (Array.isArray(errData?.errors) ? errData.errors.map(e => e.msg).join(', ') : '');
+        } catch (_) {}
+        throw new Error(backendError || `Registration failed (${response.status})`);
+      }
+
+      const data = await response.json();
+      const authtoken = data?.authtoken;
+      const returnedEmail = data?.email;
+
+      if (!authtoken || !returnedEmail) {
+        throw new Error('Invalid response from server.');
+      }
+
+      // Persist session info
+      sessionStorage.setItem('auth-token', authtoken);
+      sessionStorage.setItem('email', returnedEmail);
+      sessionStorage.setItem('name', `${firstName} ${lastName}`.trim());
+
+      // Navigate to main page after successful registration
+      navigate('/app');
     } catch (error) {
       console.error('Error in handleRegister:', error);
+      setErrorMessage(error?.message || 'An unexpected error occurred.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -75,8 +122,15 @@ function RegisterPage() {
               />
             </div>
 
+            {/* Error message */}
+            {errorMessage && (
+              <div className="alert alert-danger" role="alert">{errorMessage}</div>
+            )}
+
             {/* Register button */}
-            <button className="btn btn-primary w-100 mb-3" onClick={handleRegister}>Register</button>
+            <button className="btn btn-primary w-100 mb-3" onClick={handleRegister} disabled={loading}>
+              {loading ? 'Registering...' : 'Register'}
+            </button>
 
             <p className="mt-4 text-center">
               Already a member? <Link to="/app/login" className="text-primary">Login</Link>
