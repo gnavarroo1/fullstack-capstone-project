@@ -1,19 +1,68 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { urlConfig } from '../../config';
+import { useAppContext } from '../../context/AuthContext';
 import './LoginPage.css';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [incorrect, setIncorrect] = useState('');
+
+  const navigate = useNavigate();
+  const bearerToken = sessionStorage.getItem('bearer-token');
+  const { setIsLoggedIn } = useAppContext();
 
   const handleLogin = async () => {
     try {
-      console.log('Login invoked', { email });
-      // TODO: integrar con backend (POST /api/users/login)
+      // Step 1: Implement API call
+      const res = await fetch(`${urlConfig.backendUrl}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'Authorization': bearerToken ? `Bearer ${bearerToken}` : '', // Include Bearer token if available
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+        })
+      });
+
+      // Step 2: Access data and set user details
+      const json = await res.json();
+
+      if (json.authtoken) {
+        // Save tokens and user details in session storage
+        sessionStorage.setItem('auth-token', json.authtoken);
+        sessionStorage.setItem('bearer-token', json.authtoken);
+        if (json.userName) sessionStorage.setItem('name', json.userName);
+        if (json.userEmail) sessionStorage.setItem('email', json.userEmail);
+
+        // Update app auth state and navigate
+        setIsLoggedIn(true);
+        navigate('/app');
+      } else {
+        // Wrong password or user not found
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
+        setIncorrect(json?.error || 'Wrong password. Try again.');
+        setTimeout(() => {
+          setIncorrect('');
+        }, 2000);
+      }
     } catch (error) {
       console.error('Error in handleLogin:', error);
+      setIncorrect(error?.message || 'Login failed');
+      setTimeout(() => setIncorrect(''), 2000);
     }
   };
+
+  useEffect(() => {
+    // If already logged in, navigate to MainPage
+    if (sessionStorage.getItem('auth-token')) {
+      navigate('/app');
+    }
+  }, [navigate]);
 
   return (
     <div className="container mt-5">
@@ -47,6 +96,7 @@ function LoginPage() {
             </div>
 
             <button className="btn btn-primary w-100 mb-3" onClick={handleLogin}>Login</button>
+            <span style={{color: 'red', height: '.5cm', display: 'block', fontStyle: 'italic', fontSize: '12px'}}>{incorrect}</span>
 
             <p className="mt-4 text-center">
               New user? <Link to="/app/register" className="text-primary">Register</Link>

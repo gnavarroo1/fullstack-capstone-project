@@ -81,4 +81,53 @@ router.post('/register', registerValidation, async (req, res) => {
   }
 });
 
+// /login endpoint
+router.post('/login', async (req, res) => {
+  try {
+    if (!JWT_SECRET) {
+      logger.error('JWT_SECRET is not configured');
+      return res.status(500).send('Server configuration error');
+    }
+
+    // Task 1: Connect to `giftdb` in MongoDB through `connectToDatabase` in `db.js`.
+    const db = await connectToDatabase();
+
+    // Task 2: Access MongoDB `users` collection
+    const collection = db.collection('users');
+
+    // Task 3: Check user credentials in database
+    const theUser = await collection.findOne({ email: req.body.email });
+
+    // Task 7: Send appropriate message if user not found
+    if (!theUser) {
+      logger.error('User not found');
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Task 4: Check if the password matches the encrypted password and send appropriate message on mismatch
+    const result = await bcryptjs.compare(req.body.password, theUser.password);
+    if (!result) {
+      logger.error('Passwords do not match');
+      return res.status(404).json({ error: 'Wrong password' });
+    }
+
+    // Task 5: Fetch user details from database
+    const userName = theUser.firstName;
+    const userEmail = theUser.email;
+
+    // Task 6: Create JWT authentication if passwords match with user._id as payload
+    const payload = {
+      user: {
+        id: theUser._id.toString(),
+      },
+    };
+    const authtoken = jwt.sign(payload, JWT_SECRET);
+
+    return res.json({ authtoken, userName, userEmail });
+  } catch (e) {
+    logger.error({ err: e }, 'Internal server error in /login');
+    return res.status(500).send('Internal server error');
+  }
+});
+
 module.exports = router;
