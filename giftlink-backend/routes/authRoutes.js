@@ -130,4 +130,71 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// /update endpoint - update user profile (e.g., first name)
+router.put(
+  '/update',
+  // Basic input validation for payload
+  [body('name').isString().trim().notEmpty().withMessage('Name is required')],
+  async (req, res) => {
+    try {
+      // Validate request body
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        logger.error('Validation errors in update request', errors.array());
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      if (!JWT_SECRET) {
+        logger.error('JWT_SECRET is not configured');
+        return res.status(500).send('Server configuration error');
+      }
+
+      // Check email in headers
+      const email = req.headers.email;
+      if (!email) {
+        logger.error('Email not found in the request headers');
+        return res.status(400).json({ error: 'Email not found in the request headers' });
+      }
+
+      // Connect to MongoDB and access users collection
+      const db = await connectToDatabase();
+      const collection = db.collection('users');
+
+      // Find existing user
+      const existingUser = await collection.findOne({ email });
+      if (!existingUser) {
+        logger.error({ email }, 'User not found for update');
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Update fields
+      existingUser.firstName = req.body.name || existingUser.firstName;
+      existingUser.updatedAt = new Date();
+
+      // Persist update and return the updated document
+      const result = await collection.findOneAndUpdate(
+        { email },
+        { $set: existingUser },
+        { returnDocument: 'after' }
+      );
+
+      const updatedUser = result?.value || existingUser;
+
+      // Create JWT token
+      const payload = {
+        user: {
+          id: updatedUser._id.toString(),
+        },
+      };
+      const authtoken = jwt.sign(payload, JWT_SECRET);
+
+      logger.info({ email }, 'User profile updated successfully');
+      return res.json({ authtoken, userName: updatedUser.firstName, userEmail: updatedUser.email });
+    } catch (e) {
+      logger.error({ err: e }, 'Internal server error in /update');
+      return res.status(500).send('Internal server error');
+    }
+  }
+);
+
 module.exports = router;

@@ -11,14 +11,16 @@ export default function Navbar() {
         const authTokenFromSession = sessionStorage.getItem('auth-token');
         const nameFromSession = sessionStorage.getItem('name');
         if (authTokenFromSession) {
-            if (isLoggedIn && nameFromSession) {
+            // If there is a token in session, reflect that in context and load the user name if present.
+            setIsLoggedIn(true);
+            if (nameFromSession) {
                 setUserName(nameFromSession);
-            } else {
-                sessionStorage.removeItem('auth-token');
-                sessionStorage.removeItem('name');
-                sessionStorage.removeItem('email');
-                setIsLoggedIn(false);
             }
+        } else {
+            // No token: ensure logged-out context state. Avoid removing a non-existent token.
+            sessionStorage.removeItem('name');
+            sessionStorage.removeItem('email');
+            setIsLoggedIn(false);
         }
     }, [isLoggedIn, setIsLoggedIn, setUserName]);
 
