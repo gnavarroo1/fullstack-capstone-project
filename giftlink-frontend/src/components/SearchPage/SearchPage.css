@@ -1,26 +1,107 @@
+/* Basic layout spacing for SearchPage */
+.filter-section {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+}
+
 /* Task 1: Style the search input field */
 .search-input {
-    /* Insert specific CSS properties here */
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 10px 12px;
 }
 
 /* Task 2: Style the search button */
 .search-button {
-    /* Insert specific CSS properties here */
+    min-width: 120px;
+    font-weight: 600;
 }
 
 /* Task 3: Customize dropdown filters */
+.filter-section label {
+    font-weight: 500;
+}
+.filter-section select {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+}
 .dropdown-filter {
-    /* Insert specific CSS properties here */
+    margin-bottom: 8px;
 }
 
 /* Task 4: Style the age range slider */
 .age-range-slider {
-    /* Insert specific CSS properties here */
+    width: 100%;
+}
+input[type="range"].age-range-slider {
+    -webkit-appearance: none;
+    height: 4px;
+    background: #dee2e6;
+    border-radius: 2px;
+}
+input[type="range"].age-range-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #0d6efd;
+    border-radius: 50%;
+    cursor: pointer;
+}
+input[type="range"].age-range-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #0d6efd;
+    border-radius: 50%;
+    cursor: pointer;
 }
 
 /* Task 5: Enhance search results cards appearance */
 .search-results-card {
-    /* Insert specific CSS properties here */
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    transition: box-shadow 0.2s ease;
+}
+.search-results-card:hover {
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+.search-results-card .card-img-top {
+    max-height: 180px;
+    object-fit: cover;
 }
 
-/* Additional placeholders for tasks 6 to 10 */
+/* Task 6: Results container spacing */
+.search-results {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+@media (min-width: 768px) {
+    .search-results {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Task 7: Footer and button alignment */
+.search-results-card .card-footer {
+    background-color: #fff;
+}
+
+/* Task 8: Empty state style */
+.alert-info {
+    border-radius: 8px;
+}
+
+/* Task 9: Minor typography tweaks */
+.card-title {
+    font-weight: 600;
+}
+
+/* Task 10: Utility spacing */
+.my-1 {
+    margin-top: .25rem !important;
+    margin-bottom: .25rem !important;
+}
