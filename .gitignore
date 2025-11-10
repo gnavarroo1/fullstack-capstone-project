@@ -81,6 +81,11 @@ web_modules/
 .env.production.local
 .env.local
 
+# Ignore any dotenv files across the entire repository
+# Ensures all ".env" files in any folder are not tracked
+.env
+**/.env
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
