@@ -1,3 +1,4 @@
+/*jshint esversion: 8 */
 const express = require('express');
 const router = express.Router();
 
@@ -178,7 +179,8 @@ router.put(
         { returnDocument: 'after' }
       );
 
-      const updatedUser = result?.value || existingUser;
+      // Avoid optional chaining to satisfy JSHint ES8; use explicit null checks
+      const updatedUser = (result && result.value) ? result.value : existingUser;
 
       // Create JWT token
       const payload = {
